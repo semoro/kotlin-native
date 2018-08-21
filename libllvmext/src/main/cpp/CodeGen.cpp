@@ -61,7 +61,6 @@ bool CodeGen::compile(std::unique_ptr<Module> module, raw_pwrite_stream &os) {
       break;
   }
 
-
   functionPasses.doInitialization();
   for (Function &F : *module)
     if (!F.isDeclaration())

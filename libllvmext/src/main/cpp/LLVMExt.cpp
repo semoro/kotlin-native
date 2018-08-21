@@ -152,14 +152,16 @@ void initLLVM(PassRegistry *registry) {
   initializeExpandReductionsPass(*registry);
 }
 
-void DiagHandler(const DiagnosticInfo &DI, void *Context) {
-  bool *HasError = static_cast<bool *>(Context);
+void LLVMExtDiagnosticHandlerCallback(const DiagnosticInfo &DI, void* context) {
+  bool *errorDetected = static_cast<bool *>(context);
   if (DI.getSeverity() == DS_Error)
-    *HasError = true;
+    *errorDetected = true;
 
-  if (auto *Remark = dyn_cast<DiagnosticInfoOptimizationBase>(&DI))
-    if (!Remark->isEnabled())
+  if (auto *Remark = dyn_cast<DiagnosticInfoOptimizationBase>(&DI)) {
+    if (!Remark->isEnabled()) {
       return;
+    }
+  }
 
   DiagnosticPrinterRawOStream DP(logging::error());
   logging::error() << LLVMContext::getDiagnosticMessagePrefix(DI.getSeverity()) << ": ";
@@ -214,9 +216,8 @@ int LLVMFatLtoCodegen(LLVMContextRef contextRef,
 
   std::unique_ptr<LLVMContext> context(unwrap(contextRef));
 
-// TODO: re-enable diagnostic handler
-//  bool HasError = false;
-//  context->setDiagnosticHandler(DiagHandler, &HasError);
+  bool errorDetected = false;
+  context->setDiagnosticHandlerCallBack(LLVMExtDiagnosticHandlerCallback);
 
   initLLVM(PassRegistry::getPassRegistry());
 
@@ -233,14 +234,12 @@ int LLVMFatLtoCodegen(LLVMContextRef contextRef,
 
   CodeGen backend(codeGenConfig);
   if (backend.compile(std::move(module), output->os())) {
+    logging::error() << "LLVM Pass Manager failed.\n";
+    if (*static_cast<bool *>(context->getDiagnosticContext())) {
+      return 1;
+    }
     return 1;
   }
-
-//  if (*static_cast<bool *>(context->getDiagnosticContext())) {
-//    logging::error() << "LLVM Pass Manager failed.\n";
-//    return 1;
-//  }
-
   // Preserve compiler's output.
   output->keep();
   // Print profiling report.

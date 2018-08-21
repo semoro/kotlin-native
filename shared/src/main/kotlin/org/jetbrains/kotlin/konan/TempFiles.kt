@@ -25,7 +25,7 @@ import org.jetbrains.kotlin.konan.file.*
 class TempFiles(outputPath: String, pathToTemporaryDir: String? = null) {
     private val outputName = File(outputPath).name
 
-    val nativeBinaryFile    by lazy { File(dir, "${outputName}.kt.bc") }
+    val nativeBinaryFile    by lazy { File(dir, "$outputName.kt.bc") }
     val cAdapterCpp         by lazy { File(dir, "api.cpp") }
     val cAdapterBitcode     by lazy { File(dir, "api.bc") }
     val finalObjectFile     by lazy { File(dir, "$outputName.o")}
