@@ -16,6 +16,8 @@
 
 #include "CodeGen.h"
 
+#include <llvm/IR/Verifier.h>
+
 // It is usual LLVM invocation function.
 // The only special thing is that it runs preparation passes that are required
 // to make bitcode a little bit cleaner.
@@ -69,6 +71,19 @@ bool CodeGen::compile(std::unique_ptr<Module> module, raw_pwrite_stream &os) {
 
   if (config.shouldPerformLto) {
     modulePasses.run(*module);
+  }
+
+  // Let's verify module after all passes
+  bool hasDebugInfoError = false;
+  if (verifyModule(*module, &logging::error(), &hasDebugInfoError)) {
+    logging::error() << "Module verification after all optimization passes failed.\n";
+    return true;
+  }
+  if (hasDebugInfoError) {
+    if (config.shouldPreserveDebugInfo) {
+      logging::error() << "Invalid debug info found after all optimization passes.\n";
+      return true;
+    }
   }
 
   codeGenPasses.run(*module);

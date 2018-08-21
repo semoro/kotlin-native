@@ -93,16 +93,12 @@ fun runTopLevelPhases(konanConfig: KonanConfig, environment: KotlinCoreEnvironme
         }
         phaser.phase(KonanPhase.BITCODE) {
             emitLLVM(context, phaser)
-            produceOutput(context, phaser)
-        }
-        // We always verify bitcode to prevent hard to debug bugs.
-        if (!context.shouldUseNewBackend()) {
-            context.verifyBitCode()
-
             if (context.shouldPrintBitCode()) {
                 context.printBitCode()
             }
+            produceOutput(context, phaser)
         }
+
     }
     phaser.phase(KonanPhase.LINK_STAGE) {
         LinkStage(context, phaser).linkStage()

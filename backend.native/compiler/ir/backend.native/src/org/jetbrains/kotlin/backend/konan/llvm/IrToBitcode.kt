@@ -161,18 +161,20 @@ internal fun emitLLVM(context: Context, phaser: PhaseManager) {
     if (context.shouldContainDebugInfo()) {
         DIFinalize(context.debugInfo.builder)
     }
+    // We always verify bitcode to prevent hard to debug bugs.
+    context.verifyBitCode()
 }
 
 internal fun verifyModule(llvmModule: LLVMModuleRef, context: Context, current: String = "") {
     memScoped {
         val errorRef = allocPointerTo<ByteVar>()
-        // TODO: use LLVMDisposeMessage() on errorRef, once possible in interop.
-        if (LLVMVerifyModule(
-                llvmModule, LLVMVerifierFailureAction.LLVMPrintMessageAction, errorRef.ptr) == 1) {
+        val action = LLVMVerifierFailureAction.LLVMPrintMessageAction
+        if (LLVMVerifyModule(llvmModule, action, errorRef.ptr) == 1) {
             if (current.isNotEmpty())
                 println("Error in $current")
+            LLVMDisposeMessage(errorRef.value)
             LLVMWriteBitcodeToFile(llvmModule, context.config.tempFiles.create("error_dump", ".bc").path)
-            throw Error("Invalid module")
+            context.reportCompilationError("Invalid module")
         }
     }
 }
