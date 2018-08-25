@@ -7,7 +7,6 @@ package org.jetbrains.kotlin.ir.util
 
 import org.jetbrains.kotlin.backend.common.CommonBackendContext
 import org.jetbrains.kotlin.backend.common.descriptors.substitute
-import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.KonanBackendContext
 import org.jetbrains.kotlin.backend.konan.KonanCompilationException
 import org.jetbrains.kotlin.backend.konan.descriptors.synthesizedName
@@ -41,7 +40,6 @@ import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.resolve.OverridingStrategy
 import org.jetbrains.kotlin.resolve.OverridingUtil
 import org.jetbrains.kotlin.resolve.calls.checkers.isRestrictsSuspensionReceiver
-import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.types.*
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.typeUtil.immediateSupertypes
@@ -74,7 +72,7 @@ internal fun IrFile.addTopLevelInitializer(expression: IrExpression, context: Ko
             false
     )
 
-    fieldDescriptor.setType(expression.type.toKotlinType(), emptyList(), null, null as KotlinType?)
+    fieldDescriptor.setType(expression.type.toKotlinType(), emptyList(), null, null)
     fieldDescriptor.initialize(null, null)
 
     val irField = IrFieldImpl(
@@ -686,8 +684,7 @@ fun createField(
     ).apply {
         initialize(null, null)
 
-        val receiverType: KotlinType? = null
-        setType(type.toKotlinType(), emptyList(), owner.thisAsReceiverParameter, receiverType)
+        setType(type.toKotlinType(), emptyList(), owner.thisAsReceiverParameter, null)
     }
 
     return IrFieldImpl(startOffset, endOffset, origin, descriptor, type)

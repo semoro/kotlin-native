@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.backend.common.lower.irBlock
 import org.jetbrains.kotlin.backend.konan.InteropFqNames
 import org.jetbrains.kotlin.backend.konan.descriptors.synthesizedName
 import org.jetbrains.kotlin.backend.konan.KonanBackendContext
-import org.jetbrains.kotlin.backend.konan.getInlinedClass
 import org.jetbrains.kotlin.backend.konan.irasdescriptors.typeWithStarProjections
 import org.jetbrains.kotlin.backend.konan.isObjCClass
 import org.jetbrains.kotlin.descriptors.*
@@ -319,8 +318,7 @@ internal class PropertyDelegationLowering(val context: KonanBackendContext) : Fi
                 false, "KPROPERTIES".synthesizedName, CallableMemberDescriptor.Kind.SYNTHESIZED, SourceElement.NO_SOURCE,
                 false, false, false, false, false, false).apply {
 
-            val receiverType: KotlinType? = null
-            this.setType(fieldType, emptyList(), null, receiverType)
+            this.setType(fieldType, emptyList(), null, null)
             this.initialize(null, null)
         }
     }
