@@ -40,8 +40,12 @@ task generateCompilerVersion(type: VersionGenerator){}
 sourceSets {
     main.kotlin {
         srcDir 'src/main/kotlin'
+        srcDir 'src/library/kotlin'
         srcDir generateCompilerVersion.versionSourceDirectory
     }
+    //library.kotlin {
+     //   srcDir 'src/library/kotlin'
+    //}
 }
 
 compileKotlin {
