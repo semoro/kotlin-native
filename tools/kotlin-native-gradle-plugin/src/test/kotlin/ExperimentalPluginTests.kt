@@ -727,4 +727,37 @@ class ExperimentalPluginTests {
             output.contains("Transitive call!")
         }
     }
+
+    @Test
+    fun `Plugin should support custom entry points`() {
+        val hostSuffix = CompilerOutputKind.PROGRAM.suffix(HostManager.host)
+        val exePath = "build/exe/main/release/entry-point$hostSuffix"
+        val project = KonanProject.createEmpty(projectDirectory).apply {
+            buildFile.writeText("""
+                plugins { id 'kotlin-native' }
+
+                components.main {
+                    outputKinds = [EXECUTABLE]
+                    entryPoint = 'org.test.myMain'
+                }
+
+                task run(type: Exec) {
+                    commandLine file('$exePath').absolutePath
+                }
+            """.trimIndent())
+            settingsFile.appendText("rootProject.name = 'entry-point'")
+
+            generateSrcFile("main.kt", """
+                package org.test
+
+                fun myMain(args: Array<String>) {
+                    println("myMain called!")
+                }
+            """.trimIndent())
+        }
+        project.createRunner().withArguments(":assemble").build()
+        assertFileExists(exePath)
+        val result = project.createRunner().withArguments(":run").build()
+        assertTrue(result.output.contains("myMain called!"))
+    }
 }
