@@ -42,6 +42,7 @@ import org.jetbrains.kotlin.ir.visitors.acceptVoid
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.builtins.konan.KonanBuiltIns
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
+import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.metadata.konan.KonanProtoBuf
 import org.jetbrains.kotlin.name.FqName
@@ -505,8 +506,8 @@ internal class Context(config: KonanConfig) : KonanBackendContext(config) {
             return false
         }
         // Disable wasm target for now because it needs additional work.
-        val canCompileWasm = false
-        return (config.target != KonanTarget.WASM32 || canCompileWasm)
+        val canCompileWasm = HostManager.hostIsMac
+        return canCompileWasm
     }
 
     fun shouldGenerateTestRunner() =
