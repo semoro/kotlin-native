@@ -5,9 +5,10 @@ import llvm.*
 import org.jetbrains.kotlin.backend.konan.Context
 import org.jetbrains.kotlin.backend.konan.KonanPhase
 import org.jetbrains.kotlin.backend.konan.PhaseManager
-import org.jetbrains.kotlin.backend.konan.library.KonanLibraryReader
 import org.jetbrains.kotlin.backend.konan.llvm.parseBitcodeFile
 import org.jetbrains.kotlin.backend.konan.reportCompilationError
+import org.jetbrains.kotlin.konan.library.KonanLibrary
+import org.jetbrains.kotlin.konan.library.uniqueName
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.konan.target.KonanTarget
@@ -29,7 +30,7 @@ internal fun compileWithFatLto(context: Context, phaser: PhaseManager, nativeLib
     val runtime = context.llvm.runtime
 
     // We need to detect stdlib because it will be linked different way.
-    fun stdlibPredicate(libraryReader: KonanLibraryReader) = libraryReader.uniqueName == "stdlib"
+    fun stdlibPredicate(libraryReader: KonanLibrary) = libraryReader.uniqueName == "stdlib"
     val stdlibPath = libraries.first(::stdlibPredicate).bitcodePaths.first { it.endsWith("program.kt.bc") }
     val stdlibModule = parseBitcodeFile(stdlibPath)
 
