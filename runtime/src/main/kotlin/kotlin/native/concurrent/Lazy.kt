@@ -37,7 +37,7 @@ internal class FreezeAwareLazyImpl<out T>(initializer: () -> T) : Lazy<T> {
                         throw InvalidMutabilityException("Setting cyclic data via lazy in $this: $result")
                     }
                     // Clear initializer_ reference.
-                    ensureAcyclicAndSet(this, 1, null)
+                    // ensureAcyclicAndSet(this, 1, null)
                     @Suppress("UNCHECKED_CAST")
                     return result as T
                 }
