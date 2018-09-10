@@ -13,7 +13,6 @@ import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.incremental.components.NoLookupLocation
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.constants.ArrayValue
 import org.jetbrains.kotlin.resolve.constants.KClassValue
 import org.jetbrains.kotlin.resolve.descriptorUtil.*
@@ -43,7 +42,7 @@ abstract class ObjCExportHeaderGenerator(
     internal val namer = ObjCExportNamerImpl(moduleDescriptor, builtIns, mapper, topLevelNamePrefix)
 
     internal val generatedClasses = mutableSetOf<ClassDescriptor>()
-    internal val topLevel = mutableMapOf<KtFile, MutableList<CallableMemberDescriptor>>()
+    internal val topLevel = mutableMapOf<SourceFile, MutableList<CallableMemberDescriptor>>()
 
     private val mappedToNSNumber: List<ClassDescriptor> = with(builtIns) {
         val result = mutableListOf(boolean, byte, short, int, long, float, double)
@@ -195,7 +194,7 @@ abstract class ObjCExportHeaderGenerator(
                         if (classDescriptor != null) {
                             extensions.getOrPut(classDescriptor, { mutableListOf() }) += it
                         } else {
-                            topLevel.getOrPut(it.containingKtFile, { mutableListOf() }) += it
+                            topLevel.getOrPut(it.source.containingFile, { mutableListOf() }) += it
                         }
                     }
 
@@ -341,7 +340,7 @@ abstract class ObjCExportHeaderGenerator(
         stubs.add(objCInterface(name, categoryName = "Extensions", members = members))
     }
 
-    private fun translateTopLevel(sourceFile: KtFile, declarations: List<CallableMemberDescriptor>) {
+    private fun translateTopLevel(sourceFile: SourceFile, declarations: List<CallableMemberDescriptor>) {
         val name = namer.getFileClassName(sourceFile)
 
         // TODO: stop inheriting KotlinBase.

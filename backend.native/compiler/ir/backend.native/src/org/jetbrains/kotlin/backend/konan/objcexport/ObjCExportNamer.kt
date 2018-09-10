@@ -15,13 +15,13 @@ import org.jetbrains.kotlin.load.kotlin.PackagePartClassUtils
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.descriptorUtil.*
-
+import org.jetbrains.kotlin.resolve.source.PsiSourceFile
 
 
 interface ObjCExportNamer {
     data class ClassOrProtocolName(val swiftName: String, val objCName: String, val binaryName: String = objCName)
 
-    fun getFileClassName(file: KtFile): ClassOrProtocolName
+    fun getFileClassName(file: SourceFile): ClassOrProtocolName
     fun getClassOrProtocolName(descriptor: ClassDescriptor): ClassOrProtocolName
     fun getSelector(method: FunctionDescriptor): String
     fun getSwiftName(method: FunctionDescriptor): String
@@ -127,8 +127,11 @@ internal class ObjCExportNamerImpl(
                 first.containingDeclaration == second.containingDeclaration
     }
 
-    override fun getFileClassName(file: KtFile): ObjCExportNamer.ClassOrProtocolName = classNames.getOrPut(file) {
-        StringBuilder(PackagePartClassUtils.getFilePartShortName(file.name)).mangledSequence { append("_") }
+    override fun getFileClassName(file: SourceFile): ObjCExportNamer.ClassOrProtocolName = classNames.getOrPut(file) {
+        val psiSourceFile = file as? PsiSourceFile ?: error("SourceFile '$file' is not PsiSourceFile")
+        val psiFile = psiSourceFile.psiFile
+        val ktFile = psiFile as? KtFile ?: error("PsiFile '$psiFile' is not KtFile")
+        StringBuilder(PackagePartClassUtils.getFilePartShortName(ktFile.name)).mangledSequence { append("_") }
     }.mangleClassOrProtocolName()
 
     private val predefinedClassNames = mapOf(

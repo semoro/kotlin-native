@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.backend.konan.llvm.objcexport.ObjCExportCodeGenerato
 import org.jetbrains.kotlin.descriptors.CallableMemberDescriptor
 import org.jetbrains.kotlin.descriptors.ClassDescriptor
 import org.jetbrains.kotlin.descriptors.ModuleDescriptor
+import org.jetbrains.kotlin.descriptors.SourceFile
 import org.jetbrains.kotlin.konan.file.File
 import org.jetbrains.kotlin.konan.target.CompilerOutputKind
 import org.jetbrains.kotlin.konan.target.KonanTarget
@@ -20,7 +21,6 @@ import org.jetbrains.kotlin.konan.target.AppleConfigurables
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import org.jetbrains.kotlin.name.isSubpackageOf
-import org.jetbrains.kotlin.psi.KtFile
 
 internal class ObjCExport(val codegen: CodeGenerator) {
     val context get() = codegen.context
@@ -34,7 +34,7 @@ internal class ObjCExport(val codegen: CodeGenerator) {
 
         val objCCodeGenerator: ObjCExportCodeGenerator
         val generatedClasses: Set<ClassDescriptor>
-        val topLevelDeclarations: Map<KtFile, List<CallableMemberDescriptor>>
+        val topLevelDeclarations: Map<SourceFile, List<CallableMemberDescriptor>>
 
         if (context.config.produce == CompilerOutputKind.FRAMEWORK) {
             val headerGenerator = ObjCExportHeaderGeneratorImpl(context)

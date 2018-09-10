@@ -14,12 +14,10 @@ import org.jetbrains.kotlin.descriptors.*
 import org.jetbrains.kotlin.descriptors.annotations.AnnotationDescriptor
 import org.jetbrains.kotlin.builtins.konan.KonanBuiltIns
 import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.OverridingUtil
 import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.resolve.descriptorUtil.module
 import org.jetbrains.kotlin.resolve.scopes.MemberScope
-import org.jetbrains.kotlin.resolve.source.getPsi
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.typeUtil.isUnit
 import org.jetbrains.kotlin.util.OperatorNameConventions
@@ -176,10 +174,3 @@ val ClassDescriptor.enumEntries: List<ClassDescriptor>
 
 internal val DeclarationDescriptor.isExpectMember: Boolean
     get() = this is MemberDescriptor && this.isExpect
-
-internal val DeclarationDescriptorWithSource.containingKtFile: KtFile
-    get() {
-        val psi = this.source.getPsi() ?: error("Can't get PSI for $this")
-        val psiFile = psi.containingFile ?: error("Can't find containing file for $this")
-        return psiFile as? KtFile ?: error("Containing file $psiFile is not KtFile for $this")
-    }

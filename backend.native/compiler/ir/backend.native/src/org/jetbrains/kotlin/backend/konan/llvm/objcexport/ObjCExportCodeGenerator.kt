@@ -20,7 +20,6 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.symbols.IrClassSymbol
-import org.jetbrains.kotlin.psi.KtFile
 import org.jetbrains.kotlin.resolve.descriptorUtil.getSuperClassOrAny
 import org.jetbrains.kotlin.types.KotlinType
 import org.jetbrains.kotlin.types.typeUtil.isUnit
@@ -149,7 +148,7 @@ internal class ObjCExportCodeGenerator(
 
     internal fun emitRtti(
             generatedClasses: Collection<ClassDescriptor>,
-            topLevel: Map<KtFile, List<CallableMemberDescriptor>>
+            topLevel: Map<SourceFile, List<CallableMemberDescriptor>>
     ) {
         val objCTypeAdapters = mutableListOf<ObjCTypeAdapter>()
 
@@ -836,7 +835,7 @@ private fun ObjCExportCodeGenerator.vtableIndex(descriptor: FunctionDescriptor):
 }
 
 private fun ObjCExportCodeGenerator.createTypeAdapterForFileClass(
-        sourceFile: KtFile,
+        sourceFile: SourceFile,
         declarations: List<CallableMemberDescriptor>
 ): ObjCExportCodeGenerator.ObjCTypeAdapter {
     val name = namer.getFileClassName(sourceFile).binaryName
