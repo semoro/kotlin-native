@@ -122,11 +122,9 @@ extern "C" {
 // TODO: this implementation is just a hack, e.g. the result is inexact;
 // however it is better to have an inexact stacktrace than not to have any.
 OBJ_GETTER0(GetCurrentStackTrace) {
+  const TypeInfo* arrayTypeInfo = getAppropriateArrayTypeInfo<void*>();
 #if OMIT_BACKTRACE
-  ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, 1, OBJ_RESULT);
-  ArrayHeader* array = result->array();
-  CreateStringFromCString("<UNIMPLEMENTED>", ArrayAddressOfElementAt(array, 0));
-  return result;
+  return AllocArrayInstance(arrayTypeInfo, 0, OBJ_RESULT);
 #else
   // Skips first 3 elements as irrelevant.
   constexpr int kSkipFrames = 3;
@@ -143,7 +141,6 @@ OBJ_GETTER0(GetCurrentStackTrace) {
   void* buffer[maxSize];
 
   int size = backtrace(buffer, maxSize);
-  const TypeInfo* arrayTypeInfo = getAppropriateArrayTypeInfo<void*>();
 
   if (size < kSkipFrames)
       return AllocArrayInstance(arrayTypeInfo, 0, OBJ_RESULT);
@@ -159,7 +156,10 @@ OBJ_GETTER0(GetCurrentStackTrace) {
 
 OBJ_GETTER(GetStackTraceStrings, KConstRef stackTrace) {
 #if OMIT_BACKTRACE
-
+  ObjHeader* result = AllocArrayInstance(theArrayTypeInfo, 1, OBJ_RESULT);
+  ArrayHeader* array = result->array();
+  CreateStringFromCString("<UNIMPLEMENTED>", ArrayAddressOfElementAt(array, 0));
+  return result;
 #else
   uint32_t size = stackTrace->array()->count_;
   ObjHolder resultHolder;
