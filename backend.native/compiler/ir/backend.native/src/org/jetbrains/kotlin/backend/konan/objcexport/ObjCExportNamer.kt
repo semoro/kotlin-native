@@ -19,7 +19,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.*
 
 
 interface ObjCExportNamer {
-    data class ClassOrProtocolName(val swiftName: String, val objCName: String, val binaryName: String)
+    data class ClassOrProtocolName(val swiftName: String, val objCName: String, val binaryName: String = objCName)
 
     fun getFileClassName(file: KtFile): ClassOrProtocolName
     fun getClassOrProtocolName(descriptor: ClassDescriptor): ClassOrProtocolName
@@ -46,23 +46,27 @@ internal class ObjCExportNamerImpl(
         private val topLevelNamePrefix: String = moduleDescriptor.namePrefix
 ) : ObjCExportNamer {
 
-    private fun String.mangleClassOrProtocolName(): ObjCExportNamer.ClassOrProtocolName {
-        val prefixedName = topLevelNamePrefix + this
-        return ObjCExportNamer.ClassOrProtocolName(swiftName = this, objCName = prefixedName, binaryName = prefixedName)
-    }
+    private fun String.mangleClassOrProtocolName(): ObjCExportNamer.ClassOrProtocolName =
+            ObjCExportNamer.ClassOrProtocolName(swiftName = this, objCName = "$topLevelNamePrefix${this}")
 
     private fun String.toUnmangledClassOrProtocolName(): ObjCExportNamer.ClassOrProtocolName =
-            ObjCExportNamer.ClassOrProtocolName(swiftName = this, objCName = this, binaryName = this)
+            ObjCExportNamer.ClassOrProtocolName(swiftName = this, objCName = this)
+
+    private fun String.toSpecialStandardClassOrProtocolName() = ObjCExportNamer.ClassOrProtocolName(
+            swiftName = "Kotlin$this",
+            objCName = "${topLevelNamePrefix}$this",
+            binaryName = "Kotlin$this"
+    )
 
     val kotlinAnyName = "KotlinBase".toUnmangledClassOrProtocolName()
 
-    val mutableSetName = "KotlinMutableSet".toUnmangledClassOrProtocolName()
-    val mutableMapName = "KotlinMutableDictionary".toUnmangledClassOrProtocolName()
+    val mutableSetName = "MutableSet".toSpecialStandardClassOrProtocolName()
+    val mutableMapName = "MutableDictionary".toSpecialStandardClassOrProtocolName()
 
     fun numberBoxName(descriptor: ClassDescriptor): ObjCExportNamer.ClassOrProtocolName =
-            "Kotlin${descriptor.name.asString()}".toUnmangledClassOrProtocolName()
+            descriptor.name.asString().toSpecialStandardClassOrProtocolName()
 
-    val kotlinNumberName = "KotlinNumber".toUnmangledClassOrProtocolName()
+    val kotlinNumberName = "Number".toSpecialStandardClassOrProtocolName()
 
     private val methodSelectors = object : Mapping<FunctionDescriptor, String>() {
 
